@@ -1,0 +1,3 @@
+[submodule "Emilie"]
+	path = Emilie
+	url = git@github.com:JohnnyWestlake/Emilie.git

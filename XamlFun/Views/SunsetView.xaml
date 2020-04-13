@@ -1,0 +1,43 @@
+﻿<c:PageBase x:Class="XamlFun.Views.SunsetView"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:c="using:XamlFun.Common"
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            mc:Ignorable="d">
+
+    <Grid x:Name="Root">
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                <GradientStop Color="#434265" />
+                <GradientStop Offset="0.5" Color="#E76867" />
+                <GradientStop Offset="1" Color="#FCBB9D" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Grid x:Name="ShadowHost" />
+
+        <Image Opacity="0.3"
+               Source="http://www.clker.com/cliparts/8/8/c/5/11949863832019937540moon-half.svg"
+               Stretch="UniformToFill" />
+
+        <Grid x:Name="BladesHost" />
+
+        <StackPanel MaxWidth="300"
+                    Margin="12"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Canvas.ZIndex="100"
+                    FlowDirection="RightToLeft"
+                    Spacing="12">
+            <HyperlinkButton Content="Based on this codepen"
+                             Foreground="White"
+                             NavigateUri="https://codepen.io/diomako/pen/XjbNmy" />
+
+            <TextBlock Foreground="White"
+                       Text="300 blades of grass rendered entirely in the Composition layer and animated via DWM, with shadowing."
+                       TextWrapping="Wrap" />
+        </StackPanel>
+
+    </Grid>
+</c:PageBase>
