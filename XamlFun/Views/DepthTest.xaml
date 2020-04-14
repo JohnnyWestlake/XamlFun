@@ -15,6 +15,10 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <Border x:Name="ShadowRoot"
+                Grid.Row="1"
+                Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" />
+
         <toolkit:WrapPanel x:Name="wrapper"
                            Grid.Row="1"
                            HorizontalAlignment="Center"

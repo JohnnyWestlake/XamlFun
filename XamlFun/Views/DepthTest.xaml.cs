@@ -29,8 +29,10 @@ namespace XamlFun.Views
         private void AnimateWrapper(double depth = -600, TimeSpan? stagger = null)
         {
             wrapper.Children.Clear();
-
             wrapper.Width = 170 * 3;
+
+            ThemeShadow s = new ThemeShadow();
+            s.Receivers.Add(ShadowRoot);
 
             foreach (var i in Enumerable.Range(0, 9))
             {
@@ -39,7 +41,8 @@ namespace XamlFun.Views
                     Margin = new Thickness(8),
                     Height = 150,
                     Width = 150,
-                    Fill = new SolidColorBrush(Utils.GetRandomColor())
+                    Fill = new SolidColorBrush(Utils.GetRandomColor()),
+                    Shadow = s
                 });
             }
 

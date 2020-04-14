@@ -15,7 +15,7 @@
             </LinearGradientBrush>
         </Grid.Background>
 
-        <Grid x:Name="ShadowHost" />
+        <Grid x:Name="ShadowHost" Visibility="{x:Bind EnableShadows.IsChecked.Value, Mode=OneWay}" />
 
         <Image Opacity="0.3"
                Source="http://www.clker.com/cliparts/8/8/c/5/11949863832019937540moon-half.svg"
@@ -35,8 +35,13 @@
                              NavigateUri="https://codepen.io/diomako/pen/XjbNmy" />
 
             <TextBlock Foreground="White"
-                       Text="300 blades of grass rendered entirely in the Composition layer and animated via DWM, with shadowing."
+                       Text="250 blades of grass rendered entirely in the Composition layer and animated via DWM, with shadowing."
                        TextWrapping="Wrap" />
+
+            <CheckBox x:Name="EnableShadows"
+                      Content="Shadows"
+                      Foreground="White"
+                      IsChecked="True" />
         </StackPanel>
 
     </Grid>

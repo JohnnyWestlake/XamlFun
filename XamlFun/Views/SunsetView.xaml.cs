@@ -32,6 +32,14 @@ namespace XamlFun.Views
         CompositionLinearGradientBrush _grad { get; }
         CompositionColorBrush _shad { get; }
 
+        CompositionEllipseGeometry _geom { get; }
+        CompositionSpriteShape _grassShape { get; }
+        CompositionSpriteShape _shadowShape { get; }
+        ExpressionAnimation _cent { get; }
+        ExpressionAnimation _grassOffset { get; }
+        ExpressionAnimation _shadowOffset { get; }
+        ExpressionAnimation _shadowRotation { get; }
+
         public SunsetView()
         {
             this.InitializeComponent();
@@ -51,53 +59,58 @@ namespace XamlFun.Views
 
             _shad = c.CreateColorBrush();
             _shad.Color = Color.FromArgb(100, 0, 0, 0);
-           
-            // 3. Create blades
-            for (int i = 0; i < 300; i++)
+
+            // 3. Create grass geometry & resources
+            _geom = c.CreateEllipseGeometry();
+            _geom.Radius = new Vector2(4, 150);
+            _geom.Center = new Vector2(4, 150);
+            _cent = CompositionFactory.CreateCenteringExpression(0.5, 0.5);
+
+            _grassShape = c.CreateSpriteShape(_geom);
+            _grassShape.FillBrush = _grad;
+
+            _shadowShape = c.CreateSpriteShape(_geom);
+            _shadowShape.FillBrush = _shad;
+
+            _grassOffset = c.CreateExpressionAnimation()
+                .SetTarget("Offset")
+                .SetParameter("Root", _rootVisual)
+                .SetExpression("Vector3(Root.Size.X * percent, Root.Size.Y - (this.Target.Size.Y * 0.5f), 0f)");
+
+            _shadowOffset = c.CreateExpressionAnimation()
+                .SetTarget(nameof(Visual.Offset))
+                .SetExpression("Caster.Offset");
+
+            _shadowRotation = c.CreateExpressionAnimation()
+                .SetTarget(nameof(Visual.RotationAngleInDegrees))
+                .SetExpression("Caster.RotationAngleInDegrees");
+
+            // 4. Create blades
+            for (int i = 0; i < 250; i++)
                 PlantGrassSeed();
 
-            // 4. Create blur for shadow
+            // 5. Create blur for shadow
             CreateBlurLayer();
         }
 
-        ShapeVisual CreateGrassBlade(Compositor c, CompositionBrush brush)
+        ShapeVisual CreateGrassBlade(CompositionSpriteShape shape)
         {
-            var e = c.CreateEllipseGeometry();
-            e.Radius = new Vector2(4, 150);
-            e.Center = new Vector2(4, 150);
-            var shape = c.CreateSpriteShape(e);
-            shape.FillBrush = brush;
-            var v = c.CreateShapeVisual();
+            var v = shape.Compositor.CreateShapeVisual();
             v.Shapes.Add(shape);
             v.Size = new Vector2(8, 300);
-
-            var cent = CompositionFactory.CreateCenteringExpression(0.5, 0.5);
-            v.StartAnimation(cent);
-
             v.Scale = new Vector3(1f, (float)(_rand.Next(70, 300) / 100d), 1f);
-
+            v.StartAnimation(_cent);
             return v;
         }
 
         void PlantGrassSeed()
         {
             // 1. Create main grass blade
-            var c = _rootVisual.Compositor;
-
-            var shape = CreateGrassBlade(_rootVisual.Compositor, _grad);
+            var shape = CreateGrassBlade(_grassShape);
 
             // 2. Set relative positions
-            shape.StartAnimation(
-                shape.CreateExpressionAnimation("Offset.Y")
-                .SetParameter("Root", _rootVisual)
-                .SetParameter("me", shape)
-                .SetExpression("Root.Size.Y - (me.Size.Y * 0.5f)"));
-
             var percent = _rand.Next(0, 10000) / 10000d;
-            var exp = shape.CreateExpressionAnimation("Offset.X")
-                .SetParameter("Root", _rootVisual)
-                .SetExpression($"Root.Size.X * {percent.ToString(CultureInfo.InvariantCulture)}");
-            shape.StartAnimation(exp);
+            shape.StartAnimation(_grassOffset.SetParameter("percent", percent)); 
 
             // 3. Start animating
             ApplyWind(shape);
@@ -105,18 +118,12 @@ namespace XamlFun.Views
             // 4. Add to visual tree
             BladesHost.GetContainerVisual().Children.InsertAtTop(shape);
 
-            // 5. Create the shadow for the blade, that matches it's position.
-            var shadow = CreateGrassBlade(c, _shad);
+            // 5. Create the shadow for the blade
+            var shadow = CreateGrassBlade(_shadowShape);
             shadow.RotationAxis = Vector3.UnitZ;
             shadow.Scale = shape.Scale;
-            shadow.StartAnimation(
-                shadow.CreateExpressionAnimation(nameof(Visual.Offset))
-                .SetParameter("Caster", shape)
-                .SetExpression("Caster.Offset"));
-            shadow.StartAnimation(
-                shadow.CreateExpressionAnimation(nameof(Visual.RotationAngleInDegrees))
-                .SetParameter("Caster", shape)
-                .SetExpression("Caster.RotationAngleInDegrees"));
+            shadow.StartAnimation(_shadowOffset.SetParameter("Caster", shape));
+            shadow.StartAnimation(_shadowRotation.SetParameter("Caster", shape));
 
             // 6. Add shadow to tree.
             ShadowHost.GetContainerVisual().Children.InsertAtTop(shadow);
@@ -145,11 +152,8 @@ namespace XamlFun.Views
 
         void CreateBlurLayer()
         {
-            var brush = CompositionFactory.CreateBlurEffectBrush(_rootVisual.Compositor).SetBlurAmount(8);
-
             var sprite = _rootVisual.Compositor.CreateSpriteVisual().LinkSize(this);
-            sprite.Brush = brush;
-
+            sprite.Brush = CompositionFactory.CreateBlurEffectBrush(_rootVisual.Compositor, 5f);
             ShadowHost.GetContainerVisual().Children.InsertAtTop(sprite);
         }
 
